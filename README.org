@@ -1,0 +1,109 @@
+#+TITLE: Properst - Propositional logic REPL
+#+AUTHOR: Chris Smeele
+
+Properst is a command-line utility for manipulating propositions.
+
+* Motivation
+
+I created this program to aid me and (hopefully) other students in the Logic
+for Informatics course I'm following at Utrecht University.
+
+The value I get out of writing this program:
+- I gained a somewhat better understanding of propositional logic
+- I practiced the use / creation of parser combinators
+
+* Usage
+
+When running the program (by e.g. ~cabal new-run~ or ~cd src && runhaskell Main.hs~),
+a primitive help system is available to you by typing ~help~, ~h~, ~?~, or any
+other text that cannot be parsed into a proposition expression ;-)
+
+I recommend that you run this program via ~rlwrap~, a wrapper for GNU Readline
+(consult your package manager). This will give you line-editing and command
+history tools.
+
+For example: ~rlwrap cabal new-run~
+
+** Commands
+
+Available commands are:
+
+(replace ~PROP~ with your proposition expression)
+
+| ~PROP~    | prints proposition in canonical syntax                          |
+| ~t  PROP~ | shows for what variable values the proposition holds            |
+| ~t! PROP~ | prints a complete truth table for the given proposition         |
+| ~c  PROP~ | (*WIP*) prints the proposition's conjunctive normal form        |
+| ~c! PROP~ | (*WIP*) II, also prints truth table showing logical equivalence |
+| ~d  PROP~ | (*WIP*) prints the proposition's disjunctive normal form        |
+| ~d! PROP~ | (*WIP*) II, also prints truth table showing logical equivalence |
+
+example: ~t !(P & Q) <=> (!P | !Q)~
+
+Note: The normalizer commands are not yet completely functional.
+
+** Proposition syntax and grammar
+
+This overview is also made available by typing ~syntax~ in the prompt.
+
+Syntax elements are:
+
+| variables                     | any single letter excluding T and F (e.g. ~P~, ~Q~, ~ζ~, ~x~) |
+| booleans                      | ~T~ and ~F~, as capital letters                               |
+| negation                      | ~¬p~, ~!p~, or ~not p~                                        |
+| disjunction                   | ~p ∨ q~, ~p | q~, or ~p \/ q~                                 |
+| conjunction                   | ~p ∧ q~, ~p & q~, or ~p /\ q~                                 |
+| exclusive disjunction (XOR)   | ~p ⊻ q~, ~p ⊕ q~, or ~p x| q~                                 |
+| implication                   | ~p ⇒ q~, ~p → q~, ~p => q~, or ~p ==> q~                      |
+| converse implication          | ~p ⇐ q~, ~p ← q~, ~p <= q~, or ~p <== q~                      |
+| logical equivalence           | ~p ⇔ q~, ~p <=> q~, or ~p iff q~                              |
+
+Any proposition may be grouped with parentheses () to indicate precedence.
+
+Built-in precedence is as follows, from highest to lowest:
+
+1. negation
+2. conjunction, disjunction and exclusive disjunction
+3. implication, converse implication and logical equivalence
+
+NB: Except for chains of conjunctions and chains of disjunctions,
+    any two binary operators with the same precedence may not occur next
+    to eachother without the use of parens to denote precedence.
+
+
+** Example: Solving a logic puzzle
+
+The [[https://planet.racket-lang.org/package-source/murphy/amb.plt/1/1/planet-docs/amb/index.html][Kalotan puzzle]] can be solved as follows:
+
+We assign our variables to the following proposition atoms:
+
+| /P/ | Gender of parent 1 (T = male, F = female) |
+| /Q/ | Gender of parent 2                        |
+| /C/ | Gender of child                           |
+| /D/ | Gender of child (as reported by child)    |
+| /E/ | Truthfulness of child's gender statement  |
+
+We translate the puzzle rules into the following proposition:
+
+: (P x| Q) & (E <=> (C <=> D)) & (C => E) & (P => D) & (Q => !C & !E) & (!Q => !C x| !E)
+
+Now, we solve for P, Q and C by typing a ~t~ command:
+: ** t (P x| Q) & (E <=> (C <=> D)) & (C => E) & (P => D) & (Q => !C & !E) & (!Q => C x| E)
+: 
+:  C D E P Q | (P ⊕ Q) ∧ (E <=> (C <=> D)) ∧ (C ==> E) ∧ (P ==> D) ∧ (Q ==> ¬C ∧ ¬E) ∧ (¬Q ==> C ⊕ E) 
+: ----------------------------------------------------------------------------------------------------
+:  F T F F T |                                            T
+
+As shown, the only solution is:
+
+- Parent 1 (P) is the mother
+- Parent 2 (Q) is the father
+- The child (C) is a girl
+
+* License
+
+GPLv3, see [[./LICENSE][LICENSE]].
+
+* Author
+
+- [[https://github.com/cjsmeele][Chris Smeele]]
